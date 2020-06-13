@@ -42,7 +42,8 @@
 			// Event
 			on_error: function(err, el) {},
 			on_before_upload: function(el) {},
-			on_after_upload: function() {}
+			on_after_upload: function() {},
+			on_finish_upload: function(el) {}
 	    }, options)
 
 	    // Uploader
@@ -276,37 +277,10 @@
                             }, true);
                         }
                         return xhr;
-                    }
-
-					// success: function(data) {
-                    //     if(Object.prototype.toString.call(data) === "[object String]"){
-                    //         var data = JSON.parse(data)
-                    //     }
-					// 	var complete = setInterval(function() {
-					// 		var progress = parseInt($(template).find('.uploaderbox-fill').width() * 100) / parseInt($(template).find('.uploaderbox-progressbar').width())
-					// 		if (progress < 100) {
-					// 			$(template).attr('data-file-name', data.file_name)
-					// 			$(template).find('.uploaderbox-fill').css('width', (progress += 1) + '%')
-					// 			$(template).find('.uploaderbox-filesize').html(Math.ceil(progress) + "%")
-					// 		} else {
-					// 			clearInterval(complete)
-					// 			$(template).find('.uploaderbox-filesize').html(helper.bytes_to_size(file_reader.size))
-					// 			$(template).find('.uploaderbox-progressbar').fadeOut()
-
-					// 			// Call success callback
-					// 			callback(data)
-					// 		}
-					// 	}, 100)
-					// },
-					// progress: function(evt) {
-                    //     console.log('p..');
-					// 	if (evt.lengthComputable) {
-					// 		$(template).find('.uploaderbox-filesize').html((parseInt((evt.loaded / evt.total) * 100, 10) - 30) + "%")
-					// 		$(template).find('.uploaderbox-fill').css('width', (parseInt((evt.loaded / evt.total) * 100, 10) - 30) + "%")
-					// 	} else {
-					// 		console.log("Length not computable.");
-					// 	}
-					// }
+                    },
+					success: function(data) {
+                        config.on_finish_upload(el)
+					}
 				})
 	        },
 
