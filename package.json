@@ -1,19 +1,22 @@
 {
-  "name": "uploader.js",
-  "version": "2.0",
-  "description": "AJAX-Uploader",
-  "keywords": [
-    "uploading",
-    "ajax-upload",
-    "ajax-multi-upload"
-  ],
+  "name": "uploader",
+  "version": "1.0.0",
+  "description": "XHR Uploader",
   "main": "./uploader/uploader.js",
-  "repository": "git+https://github.com/ABTanjir/uploader.js.git",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ABTanjir/uploader.js.git"
+  },
+  "keywords": [
+    "ajax-uploader"
+  ],
   "author": "ABTanjir",
   "license": "MIT",
-  "files": [
-    "uploader/*"
-  ],
-  "devDependencies": {},
-  "dependencies": {}
+  "bugs": {
+    "url": "https://github.com/ABTanjir/uploader.js/issues"
+  },
+  "homepage": "https://github.com/ABTanjir/uploader.js#readme"
 }
