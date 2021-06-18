@@ -1,0 +1,19 @@
+{
+    "name": "uploader.js",
+    "version": "2.0",
+    "description": "AJAX-Uploader",
+    "keywords": [
+      "uploading",
+      "ajax-upload",
+      "ajax-multi-upload"
+    ],
+    "main": "./uploader/uploader.js",
+    "repository": "git+https://github.com/ABTanjir/uploader.js.git",
+    "author": "ABTanjir",
+    "license": "MIT",
+    "files": [
+      "uploader/*"
+    ],
+    "devDependencies": {},
+    "dependencies": {}
+  }
