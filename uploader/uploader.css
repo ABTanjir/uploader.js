@@ -55,7 +55,7 @@
     width: 100%;
     overflow: hidden;
     font-family: arial;
-    padding: 20px 20px 0 0;
+    padding: 0 20px 0 0;
     box-sizing: border-box
 }
 
@@ -64,7 +64,7 @@
     z-index: 99999;
     font-size: 12px;
     position: relative;
-    margin: 0 10px 10px 5px;
+    margin: 10px 10px 10px 5px;
     -o-user-select: none;
     user-select: none;
     animation: showSlowlyElement .8s

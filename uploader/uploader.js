@@ -55,11 +55,27 @@
 
 			// Generate uploader elements
 			generate_elements: function() {
+                // console.log('input name: ',config.input_name)
+                // console.log('data name: ',$(el).data('name'))
+                //custom input name
+                if($(el).data('name')){
+                    config.input_name = $(el).data('name');
+                }
 				$(el).parent().append('<input type="file" id="' + uploader.input_file + '" style="display: none;" multiple>')
 	    	    $(el).parent().append('<input type="text" name="' + config.input_name + '" id="' + uploader.input_text + '" value="[]" style="display: none;">')
 	    	    $(el).parent().append('<div class="uploaderwrapper" id="' + uploader.wrapper + '"></div>')
 
+                if($(el).data('image')){
+                    // console.log($(el).data('image'));
+                    var template = uploader.data_image($(el).data('image'));
+                    // On remove file event
+                    uploader.on_remove(template)
+
+                    // Append files
+                    $('#' + uploader.wrapper).append(template)
+                }
                 // Call uploader trigger
+	    	    // uploader.on_remove(template)
 	    	    uploader.uploader_trigger()
 	    	    uploader.on_change()
 			},
@@ -67,7 +83,7 @@
 			// Define uploader trigger
 			uploader_trigger: function() {
 				$(el).on('click', function() {
-                    console.log('uploader clicked');
+                    // console.log('uploader clicked');
 	    			$('#' + uploader.input_file).val('')
 	    			$('#' + uploader.input_file).click()
 	    		})
@@ -79,7 +95,7 @@
 	            	if (current_total_files + input_file_length > config.maximum_total_files) {
 	            		config.on_error({
 	            			'status': 'error_maximum_total_files',
-	            			'messages': 'Number of files to be uploaded is ' + config.maximum_total_files
+	            			'messages': 'You can upload maximum ' + config.maximum_total_files + ' files'
 	            		}, el)
 
 	            		return false
@@ -104,7 +120,8 @@
             		if (arr_file_name.length > 0) {
             			config.on_error({
             				'status': 'error_maximum_file_size',
-            				'messages': arr_file_name
+            				'file': arr_file_name,
+            				'messages': "Maximum file size limit exceeded"
             			}, el)
 
             			return false
@@ -128,7 +145,8 @@
             		if (arr_file_name.length > 0) {
             			config.on_error({
             				'status': 'error_minimum_file_size',
-            				'messages': arr_file_name
+            				'file': arr_file_name,
+            				'messages': "Minimum file size is "+minimum_file_size,
             			}, el)
 
             			return false
@@ -153,7 +171,8 @@
 	           		if (arr_file_name.length > 0) {
 	           			config.on_error({
 	           				'status': 'error_file_type',
-	           				'messages': arr_file_name
+	           				'file': arr_file_name,
+	           				'messages': 'File type is not supported'
 	           			}, el)
 
 	           			return false
@@ -167,6 +186,7 @@
 
             // Uploader box template
 			uploader_template: function(file_reader, file) {
+                // console.log('creating dom element...')
 			    var template = '<div class="uploaderbox" data-file-name="' + file_reader.name + '">' +
 	                    	    	'<div class="uploaderbox-image"></div>' +
 	                       			'<div class="uploaderbox-text">' + file_reader.name.toLowerCase() + '</div>' +
@@ -194,11 +214,62 @@
 				}
 
 	            return template
+            },
+
+            imageToBase64: function(url, callback) {
+                var xhr = new XMLHttpRequest();
+                xhr.onload = function() {
+                    var reader = new FileReader();
+                    reader.onloadend = function() {
+                        callback(reader.result);
+                    }
+                    reader.readAsDataURL(xhr.response);
+                };
+                xhr.open('GET', url);
+                xhr.responseType = 'blob';
+                xhr.send();
+            },
+
+			data_image: function(file) {
+                // console.log('creating image data..')
+			    var template = '<div class="uploaderbox">' +
+	                    	    	'<div class="uploaderbox-image"></div>' +
+                                    '<div class="uploaderbox-text"></div>' +
+	                       			// '<div class="uploaderbox-filesize">...</div>' +
+                        			// '<div class="uploaderbox-progressbar">' +
+                        			//     '<div class="uploaderbox-fill"></div>' +
+                        			// '</div>' +
+                        			'<div class="uploaderbox-close">&times;</div>' +
+	                       		'</div>'
+
+	            // template = $(template)
+                uploader.imageToBase64(file, function(e){
+                    $(template).find('.uploaderbox-image').css({
+						'background-image': 'url(' + e + ')'
+	                })
+                })
+                // if (file_reader.type !== undefined && ['png', 'jpg', 'jpeg'].indexOf(file_reader.type.split('/')[1]) !== -1) {
+	            //     $(template).find('.uploaderbox-image').css({
+				// 		'background-image': 'url(' + file.target.result + ')'
+	            //     })
+				// } else {
+				//     $(template).find('.uploaderbox-image').css({
+	            //         'background': 'rgb(119, 119, 119)',
+				// 		'background': '-webkit-linear-gradient(rgb(119, 119, 119), rgb(0, 0, 0))',
+				// 		'background': '-o-linear-gradient(rgb(119, 119, 119), rgb(0, 0, 0))',
+				// 		'background': '-moz-linear-gradient(rgb(119, 119, 119), rgb(0, 0, 0))',
+				// 		'background': 'linear-gradient(rgb(119, 119, 119), rgb(0, 0, 0))'
+	            //     })
+                // }
+                
+	            template = $(template)
+	            return template
 	        },
 
 	        // Event when file removed
 	        on_remove: function(template) {
 	        	$(template).find('.uploaderbox-close').on('click', function() {
+                    // console.log('file removing...');
 				    // Remove array on input text
 				    // $(this).off() //--------------------------------------------------------------------------------------------------
 				    var file_name = $(this).parent().attr('data-file-name')
@@ -207,6 +278,7 @@
 				 	var index = false
 				 	for (var z = 0; z < arr.length; z++) {
 				 		if (arr[z].file_name == file_name) {
+                            //  console.log(arr[z].file_name);
 				 		    index = z
 				 		}
 				    }
@@ -270,8 +342,7 @@
                                 } else {
                                     $(template).find('.uploaderbox-filesize').html(helper.bytes_to_size(file_reader.size))
                                     $(template).find('.uploaderbox-progressbar').fadeOut()
-                                    // Call success callback
-                                    // callback(data)
+
                                 }
 
                             }, true);
@@ -279,24 +350,35 @@
                         return xhr;
                     },
 					success: function(data) {
+                        data = JSON.parse(data);
+                        // console.log('upld success.....')
+                        $(template).attr('data-file-name', data.file_name)
                         config.on_finish_upload(el)
+                        // Call success callback
+                        callback(data)
 					}
 				})
 	        },
 
-			// Event when input file changed
+			// Event file picker button input changes
 			on_change: function() {
 				$('#' + uploader.input_file).change(function() {
             	    var input_el = $('#' + uploader.input_file)[0].files
             	    var input_text = $('#' + uploader.input_text).val()
 
+
             	    // File validation
-            	    var validate_maximum_total_files = uploader.validate_maximum_total_files($('#' + uploader.wrapper).find('.uploaderbox').length, input_el.length)
             	    var validate_maximum_file_size = uploader.validate_maximum_file_size(input_el)
             	    var validate_minimum_file_size = uploader.validate_minimum_file_size(input_el)
             	    var validate_file_type = uploader.validate_file_type(input_el)
 
-	                if (validate_maximum_total_files && validate_maximum_file_size && validate_minimum_file_size && validate_file_type) {
+                    if(validate_maximum_file_size && validate_minimum_file_size && validate_file_type && (config.maximum_total_files == 1)){
+                        $('.uploaderbox').remove()
+                    }else{
+                        return false;
+                    }
+            	    var validate_maximum_total_files = uploader.validate_maximum_total_files($('#' + uploader.wrapper).find('.uploaderbox').length, input_el.length)
+	                if (validate_maximum_file_size && validate_minimum_file_size && validate_file_type && validate_maximum_total_files) {
 
 	                	// On before upload event for auto upload
 	                	if (config.auto_upload) {
@@ -307,6 +389,7 @@
 		            		var reader = new FileReader()
 	    	                reader.onload = function (file_reader, i) {
 	        	                return function (e) {
+                                    // console.log('creating template');
 	                	            var template = uploader.uploader_template(file_reader, e)
 
 	                	            // On remove file event
@@ -322,11 +405,11 @@
 				        				})
 	                	            } else {
 	                	            	uploader.upload(template, file_reader, function(data) {
-	                	            		// Save files to input text
+                                            // Save files to input text
 	                	            		if ($('#' + uploader.input_text).val() !== '') {
-	                	            			var arr = JSON.parse($('#' + uploader.input_text).val())
+                                                var arr = JSON.parse($('#' + uploader.input_text).val())
 	                	            			arr.push(data)
-	                	            			$('#' + uploader.input_text).val(JSON.stringify(arr))
+                                                $('#' + uploader.input_text).val(JSON.stringify(arr))
 	                	            		} else {
 	                	            			$('#' + uploader.input_text).val(JSON.stringify([data]))
 	                	            		}
@@ -412,8 +495,9 @@
             		var placeholderX, placeholderY
             		var cursorPositionX = null, cursorPositionY = null
 
-            		// $(box).off() //--------------------------------------------------------------------------------------------------
+            		$(box).off() //--------------------------------------------------------------------------------------------------
             		$(box).mousedown(function() {
+                        // console.log('dragging start');
             			$(document).mousemove(function(e) {
             				if (cursorPositionX == null, cursorPositionY == null) {
             					cursorPositionX = e.pageX - $(box).position().left
@@ -455,6 +539,7 @@
             				})
             			})
             		}).mouseup(function() {
+                        // console.log('dragging stop');
             			if ($(document).find(placeholder).length == 1) {
             				$(document).unbind('mousemove')
             				$(box).animate({
@@ -486,15 +571,13 @@
             save_sort: function() {
                 var arr = JSON.parse($('#' + uploader.input_text).val())
 	    	    var new_arr = []
-
     	    	$('#' + uploader.wrapper).find('.uploaderbox').each(function() {
 	        		for (var i = 0; i < arr.length; i++) {
 	        			if (arr[i].file_name == $(this).attr('data-file-name')) {
-	    	    			new_arr.push(arr[i])
+                            new_arr.push(arr[i])
 	    		    	}
     	    		}
 	        	})
-
 	    	    $('#' + uploader.input_text).val(JSON.stringify(new_arr))
             }
 		}
@@ -769,6 +852,7 @@
 
 				// Event when uploader file removed
 				$(template).find('.uploaderbox-close').on('click', function() {
+                    // console.log('uploader file remove');
 	    			// $(this).off() //--------------------------------------------------------------------------------------------------
 
 	    			// Find and remove file by name
@@ -834,7 +918,8 @@
             		if (arr_file_name.length > 0) {
             			config.on_error({
             				'status': 'error_maximum_file_size',
-            				'messages': arr_file_name
+            				'file': arr_file_name,
+            				'messages': 'Maximum file size limit exceeded'
             			}, el)
 
             			return false
@@ -858,7 +943,8 @@
             		if (arr_file_name.length > 0) {
             			config.on_error({
             				'status': 'error_minimum_file_size',
-            				'messages': arr_file_name
+            				'file': arr_file_name,
+            				'messages': 'File not supported.'
             			}, el)
 
             			return false
@@ -883,7 +969,8 @@
 	           		if (arr_file_name.length > 0) {
 	           			config.on_error({
 	           				'status': 'error_file_type',
-	           				'messages': arr_file_name
+	           				'file': arr_file_name,
+	           				'messages': 'File type is not supported'
 	           			}, el)
 
 	           			return false
@@ -961,7 +1048,7 @@
 							$(template).find('.uploaderbox-filesize').html((parseInt((evt.loaded / evt.total) * 100, 10) - 30) + "%")
 							$(template).find('.uploaderbox-fill').css('width', (parseInt((evt.loaded / evt.total) * 100, 10) - 30) + "%")
 						} else {
-							console.log("Length not computable.");
+							// console.log("Length not computable.");
 						}
 					}
 				})
@@ -1041,7 +1128,10 @@
 			},
 
 	        // Generate filepicker elements
-			generate_elements: function() {
+			generate_elements: function() {//custom input name
+                if($(el).data('name')){
+                    config.input_name = $(el).data('name');
+                }
 				$(el).parent().append('<input type="file" id="' + filepicker.input_file + '" style="display: none;" multiple>')
 	    	    $(el).parent().append('<input type="text" name="' + config.input_name + '" id="' + filepicker.input_text + '" value="[]" style="display: none;">')
 	    	    $(el).parent().append('<div class="uploaderwrapper" id="' + filepicker.wrapper + '"></div>')
@@ -1062,7 +1152,8 @@
 					if (data.file_size > config.maximum_file_size) {
 						config.on_error({
 							'status': 'error_maximum_file_size',
-							'messages': [ data.file_name ]
+							'file': [ data.file_name ],
+            				'messages': "Maximum file size limit exceeded"
 						}, el)
 
 						return false
@@ -1080,7 +1171,8 @@
 					if (config.file_types_allowed.indexOf(data.file_type) == -1) {
 						config.on_error({
 							'status': 'error_file_type',
-							'messages': [ data.file_name ]
+							'file': [ data.file_name ],
+                            'messages': 'File type is not supported'
 						}, el)
 
 						return false
@@ -1145,6 +1237,8 @@
 	        // Event when filepicker file removed
 	        on_remove: function(template) {
 	        	$(template).find('.uploaderbox-close').on('click', function(e) {
+                    
+                    // console.log('filepicker file remove');
      				$(this).parent().removeClass('selected')
 				    $(this).hide()
 
