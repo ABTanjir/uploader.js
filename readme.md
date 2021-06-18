@@ -83,3 +83,36 @@ var myUploader = $('.example').uploader({
     file_picker_url: 'files.php'
 })
 ```
+
+Complete Uses
+```js
+
+    $('.user_image').uploader({
+        upload_url: base_url+'/upload',
+        input_name: 'file',
+        auto_upload: true,
+        maximum_total_files: 1,
+        maximum_file_size: 7*1024*1024, // ini byte
+        file_types_allowed: ['image/jpeg', 'image/png', 'image/vnd.adobe.photoshop'],
+        on_before_upload: function(e) {
+            $(e).closest('form').find(":submit").prop('disabled', true);
+            // $('.save-manual').attr('disabled', true)
+        },
+        on_success_upload: function(e) {
+            // $(e).closest('form').find(":submit").prop('disabled', false);
+            // $('.save-manual').attr('disabled', false)
+        },
+        on_finish_upload: function(e) {
+            $(e).closest('form').find(":submit").prop('disabled', false);
+        },
+        on_error: function(err) {
+            // console.log(err.messages);
+            Swal.fire({
+                title: "Upload Failed",
+                text: err.messages,
+                type: "warning"
+            })
+        }
+    })
+
+```
