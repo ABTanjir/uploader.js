@@ -1,7 +1,7 @@
 (function ( $ ) {
 
 	$.fn.uploader = function(options) {
-        
+
         // Helper
 		var helper = {
 			get_random_integer: function(min, max) {
@@ -116,7 +116,7 @@
 	            			arr_file_name.push(input_el[i].name)
 	            		}
                     }
-                    
+
             		if (arr_file_name.length > 0) {
             			config.on_error({
             				'status': 'error_maximum_file_size',
@@ -132,7 +132,7 @@
             		return true
             	}
             },
-            
+
 			validate_minimum_file_size : function(input_el) {
 				if (config.minimum_file_size !== null) {
 	            	var arr_file_name = []
@@ -261,7 +261,7 @@
 				// 		'background': 'linear-gradient(rgb(119, 119, 119), rgb(0, 0, 0))'
 	            //     })
                 // }
-                
+
 	            template = $(template)
 	            return template
 	        },
@@ -311,16 +311,22 @@
 
 	        // Ajax upload files
 	        upload: function(template, file_reader, callback) {
-				var form_data = new FormData();    
+                var form_data = new FormData();
+                var file_name = file_reader.name;
 				form_data.append('file', file_reader);
-                var file_name = file_reader.name
+
+                var _token = el.attr('_token')
+                if(typeof _token !== 'undefined' && _token !== false){
+                    form_data.append('_token', _token);
+                }
+
 				$.ajax({
 					url: config.upload_url,
 					data: form_data,
 					processData: false,
 					contentType: false,
                     type: 'POST',
-                    mimeType:"multipart/form-data",                    
+                    mimeType:"multipart/form-data",
                     cache: false,
 
                     xhr: function(){
@@ -334,7 +340,7 @@
                                 if (event.lengthComputable) {
                                     percent = Math.ceil(position / total * 100);
                                 }
-                                
+
                                 if (percent < 100) {
                                     $(template).attr('data-file-name', file_name)
                                     $(template).find('.uploaderbox-fill').css('width', (percent) + '%')
@@ -433,7 +439,7 @@
 	                // $(document).off() //-------------------------------------------------------------------------------------------------------------------------
 		            $(document).ajaxStop(function() {
 		           		if (!last_upload) {
-		           			last_upload = true			
+		           			last_upload = true
                                setTimeout(function() {
                                    config.on_success_upload(el)
 							}, 1000)
@@ -465,7 +471,7 @@
 	        	        	// Save sorted files
             				uploader.save_sort()
 
-            	            // Save success upload state 
+            	            // Save success upload state
             				success_upload++
 						})
 					}
@@ -474,7 +480,7 @@
 						var ivl = setInterval(function() {
 							if (success_upload == uploader.temporary_files.length) {
 								uploader.temporary_files = []
-					
+
 						        // Call success callback
 						        on_success_callback()
 						        clearInterval(ivl)
@@ -829,7 +835,7 @@
 				if (file.file_thumbnail != '') {
 					// Show image with lazy load
 					var $temporary_image = $("<img>")
-					
+
 					$temporary_image.load(function() {
 						var temp = $(this)
 						setTimeout(function() {
@@ -868,7 +874,7 @@
 
 	       			arr.splice(index, 1)
 	       			$('#' + filepicker.input_text).val(JSON.stringify(arr))
-                    
+
     				// Remove thumbnail
     				$(this).parent().fadeOut(function() {
     					$(this).remove()
@@ -930,7 +936,7 @@
             		return true
             	}
             },
-            
+
 			validate_upload_minimum_file_size : function(input_el) {
 				if (config.minimum_file_size !== null) {
 	            	var arr_file_name = []
@@ -1014,7 +1020,7 @@
 
 			// Ajax filepicker upload files
 	        upload: function(template, file_reader, callback) {
-				var form_data = new FormData();    
+				var form_data = new FormData();
 				form_data.append('file', file_reader);
 
 				$.ajax({
@@ -1025,7 +1031,7 @@
 					type: 'POST',
 					success: function(data) {
 						var data = JSON.parse(data)
-						
+
 						// Call success callback
 						callback(data)
 
@@ -1237,7 +1243,7 @@
 	        // Event when filepicker file removed
 	        on_remove: function(template) {
 	        	$(template).find('.uploaderbox-close').on('click', function(e) {
-                    
+
                     // console.log('filepicker file remove');
      				$(this).parent().removeClass('selected')
 				    $(this).hide()
@@ -1268,7 +1274,7 @@
 	        // Filepicker pagination
 	        pagination: function(data, page) {
         	 	var total_page = Math.ceil(data.total / config.files_per_page)
-				
+
 				// Reset pagination
 				$('#' + filepicker.picker).find('.pickerpagination > ul').html('')
 
@@ -1308,7 +1314,7 @@
 
 				for (var i = start; i < page; i++) {
 					var page_template = $('<li data-page="' + i + '">' + i + '</li>')
-					$(page_template).on('click', function() { 
+					$(page_template).on('click', function() {
 						filepicker.load_files($(this).attr('data-page'))
 					})
 					$('#' + filepicker.picker).find('.pickerpagination > ul').append(page_template)
@@ -1439,7 +1445,7 @@
 		    	$('#' + filepicker.picker).find('.pickerfiles').addClass('pickerloading')
 
 		    	$.get(config.file_picker_url, {
-		    		page: page, 
+		    		page: page,
 		    		files_per_page: config.files_per_page,
 		    		search_file: $('#' + filepicker.picker).find('.pickersearch').val()
 		    	}).done(function(data) {
